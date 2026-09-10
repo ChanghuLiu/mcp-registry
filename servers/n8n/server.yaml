@@ -13,7 +13,7 @@ about:
   icon: https://www.google.com/s2/favicons?domain=n8n.io&sz=64
 source:
   project: https://github.com/czlonkowski/n8n-mcp
-  commit: 1bbfaabbc20f4989d81bc8a2cfc9f16795134ed8
+  commit: a5e3af723b15c4dac668cb6908e63f346e5776f1
 run:
   env:
     MCP_MODE: stdio
