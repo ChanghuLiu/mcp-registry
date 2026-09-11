@@ -20,7 +20,7 @@ about:
   icon: https://avatars.githubusercontent.com/u/6154722?v=4
 source:
   project: https://github.com/microsoft/markitdown
-  commit: e144e0a2be95b34df17433bac904e635f2c5e551
+  commit: 9480644d9c3b7397b9bf0156f858fa3a5aad7d2c
   directory: packages/markitdown-mcp
 run:
   volumes:
