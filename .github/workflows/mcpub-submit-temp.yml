@@ -1,0 +1,26 @@
+name: Temporary mcpub submission
+
+on:
+  push:
+    branches:
+      - distribution/mcpub-submit-2026-09-12
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Submit eligible MCP servers
+        shell: bash
+        run: |
+          set -euo pipefail
+          submit() {
+            local url="$1"
+            local description="$2"
+            echo "Submitting $url"
+            curl --fail-with-body -sS -X POST 'https://mcpub.dev/mcp' \
+              -H 'Content-Type: application/json' \
+              --data "$(jq -nc --arg url "$url" --arg description "$description" '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"submit",arguments:{url:$url,description:$description}}}')"
+            echo
+          }
+          submit 'https://england-works-watch-production.up.railway.app/mcp' 'Evidence-backed Skilled Worker sponsor change-impact decisions for England.'
+          submit 'https://cqc-provider-mcp-production.up.railway.app/mcp' 'CQC registration, provider-change and notification decisions for England with official evidence.'
