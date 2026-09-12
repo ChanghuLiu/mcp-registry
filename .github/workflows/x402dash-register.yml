@@ -1,0 +1,58 @@
+name: Register regulatory x402 endpoints with x402dash
+
+on:
+  push:
+    branches:
+      - automation/x402dash-register-2026-09-12
+
+jobs:
+  cqc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Register CQC endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          register() {
+            local url="$1" name="$2" desc="$3"
+            payload=$(jq -nc --arg url "$url" --arg name "$name" --arg description "$desc" '{url:$url,name:$name,description:$description,category:"Government/Regulatory",tags:["uk","regulatory","x402","cqc"]}')
+            echo "=== $name ==="
+            curl -sS --fail-with-body --max-time 120 -X POST 'https://api.x402dash.com/v1/register' -H 'content-type: application/json' --data "$payload"
+            echo
+          }
+          register 'https://cqc-provider-mcp-production.up.railway.app/api/v1/registration-scope-preflight' 'CQC Registration Scope Preflight' 'Deterministic evidence-linked CQC registration-scope and regulated-activity preflight for England.'
+          register 'https://cqc-provider-mcp-production.up.railway.app/api/v1/statutory-notification-preflight' 'CQC Statutory Notification Preflight' 'Deterministic evidence-linked CQC statutory-notification duty preflight for England.'
+
+  taxi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Register Taxi PHV endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          register() {
+            local url="$1" name="$2" desc="$3"
+            payload=$(jq -nc --arg url "$url" --arg name "$name" --arg description "$desc" '{url:$url,name:$name,description:$description,category:"Government/Regulatory",tags:["uk","taxi","phv","licensing","x402"]}')
+            echo "=== $name ==="
+            curl -sS --fail-with-body --max-time 120 -X POST 'https://api.x402dash.com/v1/register' -H 'content-type: application/json' --data "$payload"
+            echo
+          }
+          register 'https://uk-taxi-phv-mcp-production.up.railway.app/api/v1/preflight' 'UK Taxi PHV Licensing Preflight' 'One-authority deterministic England taxi/private-hire licensing preflight with official-source evidence.'
+          register 'https://uk-taxi-phv-mcp-production.up.railway.app/api/v1/compare' 'UK Taxi PHV Licensing Compare' 'Cross-authority deterministic England taxi/private-hire licensing comparison with evidence freshness guards.'
+
+  premises:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Register Premises Licence endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          register() {
+            local url="$1" name="$2" desc="$3"
+            payload=$(jq -nc --arg url "$url" --arg name "$name" --arg description "$desc" '{url:$url,name:$name,description:$description,category:"Government/Regulatory",tags:["uk","premises-licence","licensing","x402"]}')
+            echo "=== $name ==="
+            curl -sS --fail-with-body --max-time 120 -X POST 'https://api.x402dash.com/v1/register' -H 'content-type: application/json' --data "$payload"
+            echo
+          }
+          register 'https://uk-premises-licence-mcp-production.up.railway.app/api/v1/preflight' 'UK Premises Licence Preflight' 'Paid evidence-linked deterministic premises-licence preflight for one supported UK authority.'
+          register 'https://uk-premises-licence-mcp-production.up.railway.app/api/v1/compare' 'UK Premises Licensing Compare' 'Paid evidence-linked cross-authority premises-licensing comparison for supported UK authorities.'
