@@ -1,0 +1,37 @@
+name: Temporary mcpub eligibility check
+
+on:
+  push:
+    branches:
+      - distribution/mcpub-submit-2026-09-12
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Taxi and Premises metadata and submit only if valid
+        shell: bash
+        run: |
+          set -euo pipefail
+          check_and_submit() {
+            local base="$1"
+            local mcp="$2"
+            local description="$3"
+            local tmp
+            tmp=$(mktemp)
+            code=$(curl -sS -o "$tmp" -w '%{http_code}' "$base/.well-known/mcp.json" || true)
+            echo "CHECK $base HTTP=$code"
+            cat "$tmp" || true
+            echo
+            if [ "$code" = "200" ] && jq -e . "$tmp" >/dev/null 2>&1; then
+              echo "ELIGIBLE $mcp"
+              curl --fail-with-body -sS -X POST 'https://mcpub.dev/mcp' \
+                -H 'Content-Type: application/json' \
+                --data "$(jq -nc --arg url "$mcp" --arg description "$description" '{jsonrpc:"2.0",id:1,method:"tools/call",params:{name:"submit",arguments:{url:$url,description:$description}}}')"
+              echo
+            else
+              echo "NOT_ELIGIBLE $mcp"
+            fi
+          }
+          check_and_submit 'https://uk-taxi-phv-mcp-production.up.railway.app' 'https://uk-taxi-phv-mcp-production.up.railway.app/mcp' 'England taxi and private-hire PHV licensing preflight with official evidence and cross-authority comparison.'
+          check_and_submit 'https://uk-premises-licence-mcp-production.up.railway.app' 'https://uk-premises-licence-mcp-production.up.railway.app/mcp' 'Evidence-first UK premises licensing preflight with local-authority policy signals and freshness guards.'
